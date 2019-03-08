@@ -1,7 +1,12 @@
+#include "src/secrets.h"
+#include <ESP8266WiFi.h>
 #include <Ticker.h>
+
 #define FADE 16
 #define BLUE 5
 #define RED 4
+
+// device state
 
 unsigned long startTime;
 Ticker breathing;
@@ -15,6 +20,22 @@ void setup() {
   digitalWrite(FADE, LOW);
   digitalWrite(BLUE, HIGH);
   digitalWrite(RED, HIGH);
+
+  Serial.begin(74880);
+  delay(10);
+  Serial.println('\n');
+  WiFi.softAP(localSSID, localPassword);
+  WiFi.begin(remoteSSID, remotePassword);
+  Serial.println("Connecting...");
+  int i = 0;
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print(++i);
+    Serial.print(' ');
+  }
+  Serial.println('\n');
+  Serial.println("Connected!");
+  Serial.println(WiFi.localIP());
 
   startTime = millis();
   breathing.attach_ms(20, breath, 8000);
