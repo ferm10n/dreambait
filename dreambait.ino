@@ -1,13 +1,14 @@
-#include "src/secrets.h"
+#include "src/CaptivePortal.cpp"
+#include <DNSServer.h>
 #include <ESP8266WiFi.h>
 #include <Ticker.h>
+#include "src/secrets.h"
 
 #define FADE 16
 #define BLUE 5
 #define RED 4
 
-// device state
-
+CaptivePortal captivePortal;
 unsigned long startTime;
 Ticker breathing;
 
@@ -24,7 +25,10 @@ void setup() {
   Serial.begin(74880);
   delay(10);
   Serial.println('\n');
+
   WiFi.softAP(localSSID, localPassword);
+  captivePortal.setup(WiFi.softAPIP());
+  
   WiFi.begin(remoteSSID, remotePassword);
   Serial.println("Connecting...");
   int i = 0;
@@ -39,9 +43,14 @@ void setup() {
 
   startTime = millis();
   breathing.attach_ms(20, breath, 8000);
+
+  Serial.print("web server running at ");
+  Serial.print(WiFi.softAPIP());
 }
 
 void loop() {
+  // process event loop
+  captivePortal.loop();
   delay(0);
 }
 
