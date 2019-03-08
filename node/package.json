@@ -1,0 +1,35 @@
+{
+  "name": "dreambait",
+  "version": "1.0.0",
+  "description": "Serves interface for the dreambait",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vue-cli-service build",
+    "dev": "vue-cli-service serve",
+    "start": "node index.js"
+  },
+  "author": "John Sanders <jws121295@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "^3.4.1",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.15.1",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-vue": "^5.2.2",
+    "semistandard": "^13.0.1",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^3.0.2",
+    "vue": "^2.6.8",
+    "vue-template-compiler": "^2.6.8",
+    "vuetify": "^1.5.5",
+    "vuetify-loader": "^1.2.1"
+  }
+}
