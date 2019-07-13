@@ -2,3 +2,4 @@ src/secrets.h
 node/node_modules
 node/dist
 .vscode/ipch
+data
