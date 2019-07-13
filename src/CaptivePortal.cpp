@@ -1,6 +1,7 @@
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <FS.h>
+#include <ESP.h>
 
 struct CaptivePortal {
   DNSServer dnsServer;
@@ -14,18 +15,17 @@ struct CaptivePortal {
     {
       Dir dir = SPIFFS.openDir("/");
       while (dir.next()) {                      // List the file system contents
-        Serial.println("neat");
         String fileName = dir.fileName();
         Serial.println(fileName);
-      //   size_t fileSize = dir.fileSize();
-      //   Serial.printf("\tFS File: %s,\tsize: %s\r\n", fileName.c_str());
       }
       Serial.print('\r');
     }
     dnsServer.start(53, "*", softApIP);
     webServer.onNotFound([&]() {
       if (!handleFileRead(webServer.uri())) {
-        webServer.send(404, "text/plain", "404: Not Found :(");
+        webServer.sendHeader("Location", "/index.html");
+        webServer.send(302, "text/plain", "");
+        Serial.println("sending redirect");
       }
       // servePortal();
     });
@@ -35,6 +35,7 @@ struct CaptivePortal {
   void loop () {
     dnsServer.processNextRequest();
     webServer.handleClient();
+    Serial.print('.');
   }
 
   bool handleFileRead (String path) {
@@ -45,10 +46,46 @@ struct CaptivePortal {
     Serial.println(path);
     String contentType = getContentType(path);
     if (SPIFFS.exists(path)) {
+
       File file = SPIFFS.open(path, "r");
       Serial.print("Streaming ");
       Serial.println(path);
-      size_t sent = webServer.streamFile(file, contentType);
+      int fileSize = file.size();
+      Serial.println(fileSize);
+      int bytesRemaining = fileSize;
+      webServer.sendHeader("Content-Length", (String) fileSize);
+      
+      int minBuffer = 1;
+      int maxBuffer = ESP.getFreeHeap() * .66;
+      while (bytesRemaining > 0) {
+        int buffSize = maxBuffer;
+        if (buffSize < minBuffer) {
+          buffSize = minBuffer;
+        }
+        if (buffSize > bytesRemaining) {
+          buffSize = bytesRemaining;
+        }
+
+        char* buff = (char*) malloc(buffSize);
+        file.readBytes(buff, buffSize);
+        bytesRemaining -= buffSize;
+        Serial.print("remaining ");
+        Serial.println(bytesRemaining);
+        webServer.sendContent_P(buff, buffSize);
+        free(buff);
+      }
+      
+      // for (int i = 0; i < fileSize; i++) {
+      //   char buff[1];
+      //   file.readBytes(buff, 1);
+      //   if (i % 256 == 0) {
+      //     Serial.println(ESP.getFreeHeap());
+      //     yield();
+      //   }
+      //   webServer.sendContent_P(buff, 1);
+      // }
+      
+      // size_t sent = webServer.streamFile(file, contentType);
       file.close();
       Serial.print("Done sending ");
       Serial.println(path);
